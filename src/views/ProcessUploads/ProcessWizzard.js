@@ -39,6 +39,7 @@ const ProcessWizzard = () => {
 
   const [sourceFilePath, setSourceFilePath] = useState("");
   const [FinalPaths, setFinalPaths] = useState([]);
+  const [Apikey, setkey] = useState([]);
 
 
   const addFinalPath = (type, path) => {
@@ -215,8 +216,9 @@ const ProcessWizzard = () => {
   };
 
   const GenerateCN = () => {
-    debugger;
+    debugger;    
     const key = "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";
+    setkey(key);
     setIsLoading(true);
     console.log("Key:", key);
     const ReqData = {
@@ -224,7 +226,7 @@ const ProcessWizzard = () => {
       SourceFilePath: sourceFilePath,
       OutputBucketName: "dscribe-outputbucket",
       SiteId: "LNH",
-      OpenAIAPIKey: key,      
+      OpenAIAPIKey: Apikey,      
       UserID: "DScribe",
       Password: "XDsLOkfUrSoPzmfo81wBisD1YtXh3rKp4eQ7vZ9jF8w=",
       GPTModel:"gpt-4-1106-preview"
