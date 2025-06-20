@@ -217,13 +217,13 @@ const ProcessWizzard = () => {
   const GenerateCN = () => {
     debugger;
     setIsLoading(true);
-    console.log(process.env.OPENAI_KEY);
+    console.log(process.env.REACT_APP_OPENAI_KEY);
     const ReqData = {
       PromptType: "Beautify",
       SourceFilePath: sourceFilePath,
       OutputBucketName: "dscribe-outputbucket",
       SiteId: "LNH",
-      OpenAIAPIKey: process.env.OPENAI_KEY,      
+      OpenAIAPIKey: process.env.REACT_APP_OPENAI_KEY,      
       UserID: "DScribe",
       Password: "XDsLOkfUrSoPzmfo81wBisD1YtXh3rKp4eQ7vZ9jF8w=",
       GPTModel:"gpt-4-1106-preview"
