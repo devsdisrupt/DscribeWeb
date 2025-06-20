@@ -61,10 +61,6 @@ const DocumentProcess = ({ addFile, handleGenerateOCR, handleGenerateAI, filesDa
     setIsOpen(false);
   };
 
-
-
-
-
   const hasOCRFiles = filesData.some((file) => file.status === "OCR");
   const hasUploadedFiles = filesData.some((file) => file.status === "UPLOADED"
   );
