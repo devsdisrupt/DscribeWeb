@@ -37,6 +37,14 @@ const ProcessWizzard = () => {
   const [selectedFileIds, setSelectedFileIds] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
 
+  const [sourceFilePath, setSourceFilePath] = useState("");
+  const [FinalPaths, setFinalPaths] = useState([]); 
+
+
+  const addFinalPath = (type, path) => {
+    setFinalPaths((prev) => [...prev, { Type: type, Path: path }]);
+  };
+  
 
   const handleUploadTypeChange = (e) => {
     setUploadType(e.target.value);
@@ -91,28 +99,65 @@ const ProcessWizzard = () => {
     });
   };
 
-  const handleUpload = () => {
+  const convertToBase64 = (file) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file); // This will result in base64 string
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = (error) => reject(error);
+    });
+  };  
+  
+
+  const handleUpload = async () => {
     debugger;
     setIsLoading(true);
-    const formData = new FormData();
-    formData.append("UserID", "razeen.ahmed"); // your custom folder name
-    selectedFiles.forEach((file) => {            
-      formData.append("files", file.file); // "files" is the field name expected by backend
-    });
+    // const formData = new FormData();
+    // formData.append("UserID", "razeen.ahmed"); // your custom folder name
+    // selectedFiles.forEach((file) => {            
+    //   formData.append("files", file.file); // "files" is the field name expected by backend
+    // });
 
-    // APIRequest(requestMethods.Upload, formData, true)
-    APIRequest(requestMethods.Test, formData, true)
+    
+    
+    const fileObj = selectedFiles[0]; // assuming one file
+    const base64string = await convertToBase64(fileObj.file);
+    const fullBase64 = base64string;
+    const base64Only = fullBase64.split(',')[1]; // just the base64 content
+
+
+    const ReqData = {
+      InputBucketName:"dscribe-inputbucket",
+      SiteId:"LNH",
+      PDFBase64:base64Only,      
+      UserID :"DScribe",
+      Password:"XDsLOkfUrSoPzmfo81wBisD1YtXh3rKp4eQ7vZ9jF8w="
+    };
+
+    APIRequest(requestMethods.UploadPDFtoGCS, ReqData, false)
+    //APIRequest(requestMethods.Test, formData, true)
       .then((data) => {
         debugger;
-        if (data.success) {
+        if (data.ResponseCode == "200") {
+          const NextPath = data.ResponseResult.ResponseResult;
+          const publicURL = NextPath.replace("gs://", "https://storage.googleapis.com/");
+          console.log(publicURL);
+          setSourceFilePath(NextPath);
+
+          addFinalPath("Uploaded", publicURL);
+          
+          
           const newFiles = selectedFiles.map((file) => ({
             fileName: file.file.name,
-            url: URL.createObjectURL(file.file),
+            url: publicURL,
+            //url: URL.createObjectURL(file.file),
             type: file.file.type,
             status: "UPLOADED",
           }));
           debugger;
           newFiles.forEach(addFile); // keeping your existing call
+          
+
           debugger;
           // Clear file selection and collapse    
           //setSelectedFiles([]);
@@ -131,31 +176,72 @@ const ProcessWizzard = () => {
   const handleTranscription = () => {
     debugger;
     setIsLoading(true);
-    const formData = new FormData();
-    formData.append("UserID", "razeen.ahmed"); // your custom folder name
 
-    // Filter files by selected IDs
-    const filesToUpload = selectedFiles.filter(file =>
-      selectedFileIds.includes(file.id) // assuming file has an `id` property
-    );
+    const ReqData = {
+      OutputBucketName:"dscribe-outputbucket",
+      SiteId:"LNH",
+      SourceFilePath:sourceFilePath,      
+      UserID :"DScribe",
+      Password:"XDsLOkfUrSoPzmfo81wBisD1YtXh3rKp4eQ7vZ9jF8w="
+    };   
 
-    // Append only selected files
-    filesToUpload.forEach((file) => {
-      formData.append("files", file.file); // backend expects "files" array
-    });
+    
 
-    APIRequest(requestMethods.Transcribe, formData, true)
+    APIRequest(requestMethods.PerformOCR, ReqData, false)
+    //APIRequest(requestMethods.Test, formData, true)
       .then((data) => {
         debugger;
-        if (data.success) {
-          const newFiles = filesToUpload.map((file) => ({
-            fileName: file.name,
-            url: URL.createObjectURL(file.file),
-            type: file.file.type,
-            status: "Transcribed",
-          }));
+        if (data.ResponseCode == "200") {
+          const NextPath = data.ResponseResult.ResponseResult;
+          const publicURL = NextPath.replace("gs://", "https://storage.googleapis.com/");
+          console.log(publicURL);
+          setSourceFilePath(NextPath);
+
+          addFinalPath("Transcribed", publicURL);         
+          
           debugger;
-          newFiles.forEach(addFile); // keeping your existing call
+          // Clear file selection and collapse    
+          //setSelectedFiles([]);
+          handleNext();
+          setIsLoading(false);
+        }
+        console.log("Upload success:", data);
+        // Show toast or update status
+      })
+      .catch((err) => {
+        setIsLoading(false);
+        console.error("Upload error:", err);
+      });
+  };
+
+  const GenerateCN = () => {
+    debugger;
+    setIsLoading(true);
+
+    const ReqData = {
+      PromptType:"Beautify",
+      SourceFilePath:sourceFilePath,   
+      OutputBucketName:"dscribe-outputbucket",
+      SiteId:"LNH",
+      OpenAIAPIKey:"",   
+      UserID :"DScribe",
+      Password:"XDsLOkfUrSoPzmfo81wBisD1YtXh3rKp4eQ7vZ9jF8w="
+    };   
+
+    
+
+    APIRequest(requestMethods.PerformOCR, ReqData, false)
+    //APIRequest(requestMethods.Test, formData, true)
+      .then((data) => {
+        debugger;
+        if (data.ResponseCode == "200") {
+          const NextPath = data.ResponseResult.ResponseResult;
+          const publicURL = NextPath.replace("gs://", "https://storage.googleapis.com/");
+          console.log(publicURL);
+          setSourceFilePath(NextPath);
+
+          addFinalPath("Transcribed", publicURL);         
+          
           debugger;
           // Clear file selection and collapse    
           //setSelectedFiles([]);
@@ -243,12 +329,19 @@ const ProcessWizzard = () => {
             filesData={filesData}
             selectedFileIds={selectedFileIds}
             setSelectedFileIds={setSelectedFileIds}
+            FinalPaths = {FinalPaths}
           />
         );
-      case 2:
-        return (
-          <i>Step-3</i>
-        );
+      case 2:        
+          return (
+            <FilesTable
+              filesData={filesData}
+              selectedFileIds={selectedFileIds}
+              setSelectedFileIds={setSelectedFileIds}
+              FinalPaths = {FinalPaths}
+            />
+          );
+        
       default:
         return "Unknown step";
     }
@@ -347,7 +440,11 @@ const ProcessWizzard = () => {
                             handleUpload(); // 🔧 Step 0 logic
                           } else if (activeStep === 1) {
                             handleTranscription();  // 🔧 Step 1 logic
-                          } else {
+                          } 
+                          else if (activeStep === 1) {
+                            GenerateCN();  // 🔧 Step 1 logic
+                          }
+                          else {
                             handleNext();        // 🔧 Step 2 (Finish)
                           }
                         }}
