@@ -16,6 +16,16 @@ import * as requestMethods from "../../WebServiceCall/ServiceNames";
 
 const FilesTable = ({ filesData, selectedFileIds, setSelectedFileIds, FinalPaths }) => {
 
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalFile, setModalFile] = useState({ type: '', path: '' });
+  const openModal = (type, path) => {
+    setModalFile({ type, path });
+    setModalOpen(true);
+  };
+
+  const closeModal = () => setModalOpen(false);
+
+
 
 
   return (
@@ -68,7 +78,7 @@ const FilesTable = ({ filesData, selectedFileIds, setSelectedFileIds, FinalPaths
                 </td>
                 <td>{item.id}</td>
                 <td>{item.fileName}</td>
-                <td>
+                {/* <td>
                   {FinalPaths.length > 0 && FinalPaths.map((entry, index) => (
                     <a
                       key={index}
@@ -81,7 +91,19 @@ const FilesTable = ({ filesData, selectedFileIds, setSelectedFileIds, FinalPaths
                       </button>
                     </a>
                   ))}
+                </td> */}
+                <td>
+                  {FinalPaths.length > 0 && FinalPaths.map((entry, index) => (
+                    <button
+                      key={index}
+                      className="btn btn-sm btn-outline-primary m-1"
+                      onClick={() => openModal(entry.Type, entry.Path)}
+                    >
+                      {entry.Type}
+                    </button>
+                  ))}
                 </td>
+
 
 
               </tr>
@@ -89,10 +111,68 @@ const FilesTable = ({ filesData, selectedFileIds, setSelectedFileIds, FinalPaths
 
           </tbody>
         </Table>
+
+
       )}
+
+      {modalOpen && (
+        <div
+          className="modal fade show d-block"
+          tabIndex="-1"
+          role="dialog"
+          style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}
+        >
+          <div className="modal-dialog modal-xl modal-dialog-centered" role="document" style={{ maxWidth: '95vw', height: '95vh' }}>
+            <div className="modal-content" style={{ height: '100%' }}>
+              {/* Header */}
+              <div className="modal-header">
+                <h2 className="modal-title">{modalFile.type}</h2>
+                <button type="button" className="btn-close" onClick={closeModal} aria-label="Close"></button>
+              </div>
+
+              {/* Body (fills remaining height) */}
+              <div className="modal-body p-0" style={{ flex: 1, overflow: 'hidden' }}>
+                <iframe
+                  src={modalFile.path}
+                  title="Viewer"
+                  className="w-100"
+                  style={{ height: '100%', border: 'none' }}
+                />
+              </div>
+
+              {/* Footer */}
+              <div className="modal-footer">
+                <button type="button" className="btn btn-secondary" onClick={closeModal}>
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+
+
     </Container>
 
   );
+
+
+};
+
+
+const TextViewer = ({ path }) => {
+  debugger;
+  const [content, setContent] = useState('');
+
+  React.useEffect(() => {
+    fetch(path)
+      .then(res => res.text())
+      .then(setContent)
+      .catch(() => setContent('Error loading text.'));
+  }, [path]);
+
+  return <pre>{content}</pre>;
 };
 
 export default FilesTable;

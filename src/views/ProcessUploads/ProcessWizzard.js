@@ -262,9 +262,66 @@ const ProcessWizzard = () => {
           setSourceFilePath(NextPath);
           addFinalPath("Beautify", publicURL);
 
-          debugger;
-          handleNext();
-          setIsLoading(false);
+          const ReqData = {
+            PromptType: "DateWiseClassification",
+            SourceFilePath: sourceFilePath,
+            OutputBucketName: "dscribe-outputbucket",
+            SiteId: "LNH",
+            OpenAIAPIKey: Apikey,
+            UserID: "DScribe",
+            Password: "XDsLOkfUrSoPzmfo81wBisD1YtXh3rKp4eQ7vZ9jF8w=",
+            GPTModel: "gpt-4-1106-preview"
+          };               
+          APIRequest(requestMethods.PerformLLMProcessing, ReqData, false)
+            //APIRequest(requestMethods.Test, formData, true)
+            .then((data) => {
+              debugger;
+              if (data.ResponseCode == "200") {
+                const NextPath = data.ResponseResult.ResponseResult;
+                const publicURL = NextPath.replace("gs://", "https://storage.googleapis.com/");
+                console.log(publicURL);
+                addFinalPath("Date Wise", publicURL);      
+                debugger;
+                const ReqData = {
+                  PromptType: "ClinicalDocumentGeneration",
+                  SourceFilePath: sourceFilePath,
+                  OutputBucketName: "dscribe-outputbucket",
+                  SiteId: "LNH",
+                  OpenAIAPIKey: Apikey,
+                  UserID: "DScribe",
+                  Password: "XDsLOkfUrSoPzmfo81wBisD1YtXh3rKp4eQ7vZ9jF8w=",
+                  GPTModel: "gpt-4-1106-preview"
+                };               
+                APIRequest(requestMethods.PerformLLMProcessing, ReqData, false)
+                  //APIRequest(requestMethods.Test, formData, true)
+                  .then((data) => {
+                    debugger;
+                    if (data.ResponseCode == "200") {
+                      const NextPath = data.ResponseResult.ResponseResult;
+                      const publicURL = NextPath.replace("gs://", "https://storage.googleapis.com/");
+                      console.log(publicURL);
+                      addFinalPath("Clinical Document", publicURL);      
+                      debugger;
+                      handleNext();
+                      setIsLoading(false);
+                    }
+                    console.log("Upload success:", data);
+                    // Show toast or update status
+                  })
+                  .catch((err) => {
+                    setIsLoading(false);
+                    console.error("Upload error:", err);
+                  });
+                
+              }
+              console.log("Upload success:", data);
+              // Show toast or update status
+            })
+            .catch((err) => {
+              setIsLoading(false);
+              console.error("Upload error:", err);
+            });
+          
         }
         console.log("Upload success:", data);
         // Show toast or update status
