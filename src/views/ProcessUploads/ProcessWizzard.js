@@ -22,8 +22,22 @@ import UploadBulk from "views/ProcessUploads/UploadBulk.js";
 import FilesTable from "views/ProcessUploads/FilesTable";
 import APIRequest from "../../WebServiceCall/APICall";
 import * as requestMethods from "../../WebServiceCall/ServiceNames";
+import CryptoJS from 'crypto-js';
+import { appCred } from "../AppConfig";
 
 const steps = ["Step-1", "Step-2", "Step-3", "Step-4"];
+
+
+// Encrypt
+export function  encryptAPIKey(apiKey, secretKey) {
+  return CryptoJS.AES.encrypt(apiKey, secretKey).toString();
+}
+
+// Decrypt
+export function decryptAPIKey(cipherText, secretKey) {
+  const bytes = CryptoJS.AES.decrypt(cipherText, secretKey);
+  return bytes.toString(CryptoJS.enc.Utf8);
+}
 
 const ProcessWizzard = () => {
   const [activeStep, setActiveStep] = useState(0);
@@ -39,7 +53,7 @@ const ProcessWizzard = () => {
 
   const [sourceFilePath, setSourceFilePath] = useState("");
   const [FinalPaths, setFinalPaths] = useState([]);
-  const [Apikey, setkey] = useState([]);
+  const [Apikey, setkey] = useState("");
 
 
   const addFinalPath = (type, path) => {
@@ -112,6 +126,10 @@ const ProcessWizzard = () => {
 
   const handleUpload = async () => {
     debugger;
+    const key = appCred.key;
+    const decrypted = decryptAPIKey(key, "MARHM");
+    setkey(decrypted);
+
     setIsLoading(true);
     // const formData = new FormData();
     // formData.append("UserID", "razeen.ahmed"); // your custom folder name
@@ -176,6 +194,7 @@ const ProcessWizzard = () => {
 
   const handleTranscription = () => {
     debugger;
+    
     setIsLoading(true);
 
     const ReqData = {
@@ -202,7 +221,7 @@ const ProcessWizzard = () => {
 
           debugger;
           // Clear file selection and collapse    
-          //setSelectedFiles([]);
+          //setSelectedFiles([]);          
           handleNext();
           setIsLoading(false);
         }
@@ -216,20 +235,18 @@ const ProcessWizzard = () => {
   };
 
   const GenerateCN = () => {
-    debugger;    
-    const key = "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";
-    setkey(key);
+    debugger;
+
     setIsLoading(true);
-    console.log("Key:", key);
     const ReqData = {
       PromptType: "Beautify",
       SourceFilePath: sourceFilePath,
       OutputBucketName: "dscribe-outputbucket",
       SiteId: "LNH",
-      OpenAIAPIKey: Apikey,      
+      OpenAIAPIKey: Apikey,
       UserID: "DScribe",
       Password: "XDsLOkfUrSoPzmfo81wBisD1YtXh3rKp4eQ7vZ9jF8w=",
-      GPTModel:"gpt-4-1106-preview"
+      GPTModel: "gpt-4-1106-preview"
     };
 
 
