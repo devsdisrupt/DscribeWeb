@@ -31,7 +31,7 @@ const Auth = (props) => {
   const location = useLocation();
 
   React.useEffect(() => {
-    document.body.classList.add("bg-gradient-default");
+    document.body.classList.add("bg-gradient-info");
     return () => {
       document.body.classList.remove("bg-default");
     };

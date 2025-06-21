@@ -26,20 +26,13 @@ const Login = () => {
 
   const handleSignIn = (e) => {
     e.preventDefault();
-    const requestData = { userid: email, password: password };
+    const requestData = { userid: email, password: password };    
+    
 
-    // APIRequest(requestMethods.Login, requestData).then((_data) => {
-    //   try {
-    //     const response = _data.ResponseResult[0];
-    //     console.log("response------", response);
-    //     // Simulated login state (placeholder logic)
-    //   } catch (error) {
-    //     console.log("error", error);
-    //   }
-    // });
-
-    if (email === "admin@gmail.com") {
-      navigate("/admin/index");
+    if (email === "admin" && password === "admin") {
+      localStorage.setItem("isLoggedIn", "true");
+      navigate("/admin/index", { replace: true });
+      //navigate("/admin/index");
     } else {
       setError("Incorrect email or password.");
     }
@@ -78,7 +71,7 @@ const Login = () => {
                   <Input
                   bsSize="sm"
                     placeholder="Email"
-                    type="email"
+                    type="text"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                   />
