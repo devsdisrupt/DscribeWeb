@@ -127,7 +127,15 @@ const FilesTable = ({ filesData, selectedFileIds, setSelectedFileIds, FinalPaths
               {/* Header */}
               <div className="modal-header">
                 <h2 className="modal-title">{modalFile.type}</h2>
-                <button type="button" className="btn-close" onClick={closeModal} aria-label="Close"></button>
+                <button
+                  type="button"
+                  className="close"
+                  aria-label="Close"
+                  onClick={closeModal}
+                >
+                  <span aria-hidden="true" className="text-primary">&times;</span>
+                </button>
+
               </div>
 
               {/* Body (fills remaining height) */}

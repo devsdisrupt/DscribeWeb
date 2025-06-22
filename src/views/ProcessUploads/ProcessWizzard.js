@@ -24,12 +24,13 @@ import APIRequest from "../../WebServiceCall/APICall";
 import * as requestMethods from "../../WebServiceCall/ServiceNames";
 import CryptoJS from 'crypto-js';
 import { appCred } from "../AppConfig";
+import axios from "axios";
 
 const steps = ["Step-1", "Step-2", "Step-3", "Step-4"];
 
 
 // Encrypt
-export function  encryptAPIKey(apiKey, secretKey) {
+export function encryptAPIKey(apiKey, secretKey) {
   return CryptoJS.AES.encrypt(apiKey, secretKey).toString();
 }
 
@@ -59,6 +60,55 @@ const ProcessWizzard = () => {
   const addFinalPath = (type, path) => {
     setFinalPaths((prev) => [...prev, { Type: type, Path: path }]);
   };
+
+  const downloadAllFiles = async () => {
+    console.log("Download started");
+    // debugger;
+    for (let i = 0; i < FinalPaths.length; i++) {
+      const file = FinalPaths[i];
+      // console.log(`Downloading file ${i + 1}:`, file);
+      try {
+        // console.log(`Fetching file from URL: ${file.Path}`);
+        const response = await axios.get(file.Path, {
+          responseType: "blob",
+        });
+
+        // Detect MIME type from response or fallback based on file extension
+        const contentType = response.headers["content-type"] || (
+          file.Path.endsWith(".txt") ? "text/plain" :
+            file.Path.endsWith(".pdf") ? "application/pdf" :
+              "application/octet-stream"
+        );
+        const blob = new Blob([response.data], { type: contentType });
+        const downloadUrl = URL.createObjectURL(blob);
+        // console.log("Blob created, download URL:", downloadUrl);
+
+        const a = document.createElement("a");
+        a.href = downloadUrl;
+        a.download = `${file.Type || "File"}_${i + 1}${file.Path.endsWith(".txt") ? ".txt" : ".pdf"}`;
+        // console.log("Anchor element created:", a);
+
+        document.body.appendChild(a);
+        console.log("Anchor appended to body");
+
+        a.click();
+        // console.log("Click triggered");
+
+        document.body.removeChild(a);
+        URL.revokeObjectURL(downloadUrl);
+        // console.log(`Download completed for file ${i + 1}`);
+        debugger;
+      } catch (error) {
+        // console.error(`Download failed for ${file.Path}:`, error);
+        debugger;
+      }
+    }
+
+    // console.log("Download process finished for all files.");
+  };
+
+
+
 
 
   const handleUploadTypeChange = (e) => {
@@ -194,7 +244,7 @@ const ProcessWizzard = () => {
 
   const handleTranscription = () => {
     debugger;
-    
+
     setIsLoading(true);
 
     const ReqData = {
@@ -271,7 +321,7 @@ const ProcessWizzard = () => {
             UserID: "DScribe",
             Password: "XDsLOkfUrSoPzmfo81wBisD1YtXh3rKp4eQ7vZ9jF8w=",
             GPTModel: "gpt-4-1106-preview"
-          };               
+          };
           APIRequest(requestMethods.PerformLLMProcessing, ReqData, false)
             //APIRequest(requestMethods.Test, formData, true)
             .then((data) => {
@@ -280,7 +330,7 @@ const ProcessWizzard = () => {
                 const NextPath = data.ResponseResult.ResponseResult;
                 const publicURL = NextPath.replace("gs://", "https://storage.googleapis.com/");
                 console.log(publicURL);
-                addFinalPath("Date Wise", publicURL);      
+                addFinalPath("Date Wise", publicURL);
                 debugger;
                 const ReqData = {
                   PromptType: "ClinicalDocumentGeneration",
@@ -291,7 +341,7 @@ const ProcessWizzard = () => {
                   UserID: "DScribe",
                   Password: "XDsLOkfUrSoPzmfo81wBisD1YtXh3rKp4eQ7vZ9jF8w=",
                   GPTModel: "gpt-4-1106-preview"
-                };               
+                };
                 APIRequest(requestMethods.PerformLLMProcessing, ReqData, false)
                   //APIRequest(requestMethods.Test, formData, true)
                   .then((data) => {
@@ -300,7 +350,7 @@ const ProcessWizzard = () => {
                       const NextPath = data.ResponseResult.ResponseResult;
                       const publicURL = NextPath.replace("gs://", "https://storage.googleapis.com/");
                       console.log(publicURL);
-                      addFinalPath("Clinical Document", publicURL);      
+                      addFinalPath("Clinical Document", publicURL);
                       debugger;
                       handleNext();
                       setIsLoading(false);
@@ -312,7 +362,7 @@ const ProcessWizzard = () => {
                     setIsLoading(false);
                     console.error("Upload error:", err);
                   });
-                
+
               }
               console.log("Upload success:", data);
               // Show toast or update status
@@ -321,7 +371,7 @@ const ProcessWizzard = () => {
               setIsLoading(false);
               console.error("Upload error:", err);
             });
-          
+
         }
         console.log("Upload success:", data);
         // Show toast or update status
@@ -488,31 +538,19 @@ const ProcessWizzard = () => {
                 </CardBody>
                 <CardFooter>
                   <Box sx={{ display: "flex", flexDirection: "row", pt: 2 }}>
-                    {/* <Button
-                      color="inherit"
-                      disabled={activeStep === 0}
-                      onClick={handleBack}
-                      sx={{ mr: 1 }}
-                    >
-                      Back
-                    </Button> */}
                     <Box sx={{ flex: "1 1 auto" }} />
+
                     {isStepOptional(activeStep) && (
                       <Button color="inherit" onClick={handleSkip} sx={{ mr: 1 }}>
                         Reset
                       </Button>
                     )}
-                    {/* <Button
-                     disabled={
-                      activeStep === 0 &&
-                      (
-                        (uploadType === 'single' && selectedFiles.length === 0)
-                      )
-                    }
-                    onClick={handleNext}>
-                    
-                      {activeStep === steps.length - 1 ? "Finish" : "Next"}
-                    </Button> */}
+
+                    {(activeStep === 3 || activeStep === steps.length) && (
+                      <Button color="info" onClick={downloadAllFiles}>
+                        Download Files
+                      </Button>
+                    )}
 
                     {!isLoading ? (
                       <Button
@@ -543,7 +581,7 @@ const ProcessWizzard = () => {
                         }
                       </Button>
                     ) : (
-                      <i class="fa fa-spinner fa-pulse fa-3x fa-fw"></i>
+                      <i className="fa fa-spinner fa-pulse fa-3x fa-fw"></i>
                     )}
                   </Box>
                 </CardFooter>
