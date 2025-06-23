@@ -155,6 +155,14 @@ const ProcessWizzard = () => {
   };
 
   const handleReset = () => {
+    setSelectedFiles([]);
+    setFilesData([]);
+    setSelectedFileIds([]);
+    setIsLoading(false);
+    setIsLoadingDownload(false);
+    setSourceFilePath("");
+    setFinalPaths([]);
+    setkey("");
     setActiveStep(0);
   };
 
@@ -436,6 +444,7 @@ const ProcessWizzard = () => {
                   checked={uploadType === "bulk"}
                   onChange={handleUploadTypeChange}
                   className="form-check-input"
+                  disabled // <- disables the radio button
                 />
                 <Label className="form-check-label" check>
                   Bulk
@@ -550,8 +559,8 @@ const ProcessWizzard = () => {
                   <Box sx={{ display: "flex", flexDirection: "row", pt: 2 }}>
                     <Box sx={{ flex: "1 1 auto" }} />
 
-                    {isStepOptional(activeStep) && (
-                      <Button color="inherit" onClick={handleSkip} sx={{ mr: 1 }}>
+                    {activeStep !== 0 && (
+                      <Button color="inherit" onClick={handleReset} sx={{ mr: 1 }}>
                         Reset
                       </Button>
                     )}
