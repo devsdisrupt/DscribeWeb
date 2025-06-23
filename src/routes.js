@@ -25,13 +25,13 @@ import Login from "views/examples/Login.js";
 import Icons from "views/examples/Icons.js";
 
 var routes = [
-  {
-    path: "/index",
-    name: "Dashboard",
-    icon: "ni ni-tv-2 text-primary",
-    component: <Index />,
-    layout: "/admin",
-  },
+  // {
+  //   path: "/index",
+  //   name: "Dashboard",
+  //   icon: "ni ni-tv-2 text-primary",
+  //   component: <Index />,
+  //   layout: "/admin",
+  // },
   // {
   //   path: "/Site",
   //   name: "Create Site",

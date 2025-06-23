@@ -328,7 +328,7 @@ const ProcessWizzard = () => {
           const publicURL = NextPath.replace("gs://", "https://storage.googleapis.com/");
           console.log(publicURL);
           setSourceFilePath(NextPath);
-          addFinalPath("Beautify", publicURL);
+          addFinalPath("Refined Text", publicURL);
 
           const ReqData = {
             PromptType: "DateWiseClassification",
@@ -567,17 +567,25 @@ const ProcessWizzard = () => {
 
                     {(activeStep === 3 || activeStep === steps.length) && (
                       !isLoadingDownload ? (
-                        <Button color="info" onClick={downloadAllFiles}>
-                          Download Files
-                        </Button>
+                        <Button
+                        style={{ backgroundColor: "#1976d2", borderColor: "#1976d2" }}
+  className="fw-bold text-white border-0 hover-darker mr-2"
+  onClick={downloadAllFiles}
+>
+  <i className="fas fa-download pr-1"></i>
+  Download
+</Button>
                       ) : (
                         <i className="fa fa-spinner fa-pulse fa-3x fa-fw"></i>
                       )
                     )}
 
 
-                    {!isLoading ? (
+                    {/* {!isLoading ? (
                       <Button
+                        color="success"
+                        size="lg"
+                        className="fw-bold bg-success text-white border-0 hover-darker"
                         disabled={
                           (activeStep === 0 && selectedFiles.length === 0) ||
                           (activeStep === 1 && uploadType === 'bulk' && selectedFileIds.length === 0)
@@ -601,12 +609,50 @@ const ProcessWizzard = () => {
                             ? "Upload"
                             : activeStep === 1
                               ? "Transcribe"
-                              : "Finish"
+                              : activeStep === 1
+                              ? "Finish"
+                              : ""
                         }
                       </Button>
                     ) : (
                       <i className="fa fa-spinner fa-pulse fa-3x fa-fw"></i>
-                    )}
+                    )} */}
+
+{activeStep !== 3 && (
+  !isLoading ? (
+    <Button
+      color="success"
+      size="lg"
+      className="fw-bold bg-success text-white border-0 hover-darker"
+      disabled={
+        (activeStep === 0 && selectedFiles.length === 0) ||
+        (activeStep === 1 && uploadType === 'bulk' && selectedFileIds.length === 0)
+      }
+      onClick={() => {
+        if (activeStep === 0) {
+          handleUpload();
+        } else if (activeStep === 1) {
+          handleTranscription();
+        } else if (activeStep === 2) {
+          GenerateCN();
+        } else {
+          handleNext();
+        }
+      }}
+    >
+      {
+        activeStep === 0
+          ? "Upload"
+          : activeStep === 1
+          ? "Transcribe"
+          : "Generate"
+      }
+    </Button>
+  ) : (
+    <i className="fa fa-spinner fa-pulse fa-3x fa-fw"></i>
+  )
+)}
+
                   </Box>
                 </CardFooter>
               </>

@@ -53,7 +53,7 @@ const FilesTable = ({ filesData, selectedFileIds, setSelectedFileIds, FinalPaths
               </th>
               <th>ID</th>
               <th>File Name</th>
-              <th>Action</th>
+              <th>View</th>
             </tr>
           </thead>
           <tbody>
