@@ -505,9 +505,15 @@ const ProcessWizzard = () => {
     <div className="header bg-gradient-info pb-8 pt-5 pt-md-8">
       <Container fluid>
         <Box sx={{ width: "100%" }}>
-          <Card className="shadow mt-5">
+          {/* <Card className="shadow mt-5"> */}
+          <Card className="shadow mt-5" style={{ maxHeight: 'calc(100vh - 150px)', overflowY: 'auto' }}>
+
             <CardHeader>
-              <Stepper activeStep={activeStep}>
+              <Stepper
+                activeStep={activeStep}
+                alternativeLabel
+                style={{ flexWrap: 'wrap', rowGap: '1rem' }} // ✅ allow wrapping and spacing
+              >
                 {steps.map((label, index) => {
                   const stepProps = {};
                   const labelProps = {};
@@ -550,9 +556,12 @@ const ProcessWizzard = () => {
               </>
             ) : (
               <>
-                <CardBody>
+                {/* <CardBody> */}
+                <CardBody style={{ overflowX: 'auto' }}>
+
                   <Row className="justify-content-center">
-                    <Col lg="12">{renderStepContent(activeStep)}</Col>
+                    {/* <Col lg="12">{renderStepContent(activeStep)}</Col> */}
+                    <Col xs="12">{renderStepContent(activeStep)}</Col>
                   </Row>
                 </CardBody>
                 <CardFooter>
@@ -568,13 +577,13 @@ const ProcessWizzard = () => {
                     {(activeStep === 3 || activeStep === steps.length) && (
                       !isLoadingDownload ? (
                         <Button
-                        style={{ backgroundColor: "#1976d2", borderColor: "#1976d2" }}
-  className="fw-bold text-white border-0 hover-darker mr-2"
-  onClick={downloadAllFiles}
->
-  <i className="fas fa-download pr-1"></i>
-  Download
-</Button>
+                          style={{ backgroundColor: "#1976d2", borderColor: "#1976d2" }}
+                          className="fw-bold text-white border-0 hover-darker mr-2"
+                          onClick={downloadAllFiles}
+                        >
+                          <i className="fas fa-download pr-1"></i>
+                          Download
+                        </Button>
                       ) : (
                         <i className="fa fa-spinner fa-pulse fa-3x fa-fw"></i>
                       )
@@ -618,40 +627,40 @@ const ProcessWizzard = () => {
                       <i className="fa fa-spinner fa-pulse fa-3x fa-fw"></i>
                     )} */}
 
-{activeStep !== 3 && (
-  !isLoading ? (
-    <Button
-      color="success"
-      size="lg"
-      className="fw-bold bg-success text-white border-0 hover-darker"
-      disabled={
-        (activeStep === 0 && selectedFiles.length === 0) ||
-        (activeStep === 1 && uploadType === 'bulk' && selectedFileIds.length === 0)
-      }
-      onClick={() => {
-        if (activeStep === 0) {
-          handleUpload();
-        } else if (activeStep === 1) {
-          handleTranscription();
-        } else if (activeStep === 2) {
-          GenerateCN();
-        } else {
-          handleNext();
-        }
-      }}
-    >
-      {
-        activeStep === 0
-          ? "Upload"
-          : activeStep === 1
-          ? "Transcribe"
-          : "Generate"
-      }
-    </Button>
-  ) : (
-    <i className="fa fa-spinner fa-pulse fa-3x fa-fw"></i>
-  )
-)}
+                    {activeStep !== 3 && (
+                      !isLoading ? (
+                        <Button
+                          color="success"
+                          size="lg"
+                          className="fw-bold bg-success text-white border-0 hover-darker"
+                          disabled={
+                            (activeStep === 0 && selectedFiles.length === 0) ||
+                            (activeStep === 1 && uploadType === 'bulk' && selectedFileIds.length === 0)
+                          }
+                          onClick={() => {
+                            if (activeStep === 0) {
+                              handleUpload();
+                            } else if (activeStep === 1) {
+                              handleTranscription();
+                            } else if (activeStep === 2) {
+                              GenerateCN();
+                            } else {
+                              handleNext();
+                            }
+                          }}
+                        >
+                          {
+                            activeStep === 0
+                              ? "Upload"
+                              : activeStep === 1
+                                ? "Transcribe"
+                                : "Generate"
+                          }
+                        </Button>
+                      ) : (
+                        <i className="fa fa-spinner fa-pulse fa-3x fa-fw"></i>
+                      )
+                    )}
 
                   </Box>
                 </CardFooter>
