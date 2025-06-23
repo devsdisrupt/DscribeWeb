@@ -55,14 +55,14 @@ const Admin = (props) => {
         props?.location?.pathname.indexOf(routes[i].layout + routes[i].path) !==
         -1
       ) {
-        return routes[i].name;
+        return "Dashboard";
       }
     }
     return "Brand";
   };
 
     React.useEffect(() => {
-      document.body.classList.add("bg-gradient-default");
+      document.body.classList.add("bg-gradient-info");
       return () => {
         document.body.classList.remove("bg-default");
       };

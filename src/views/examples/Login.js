@@ -31,7 +31,7 @@ const Login = () => {
 
     if (email === "admin" && password === "admin") {
       localStorage.setItem("isLoggedIn", "true");
-      navigate("/admin/index", { replace: true });
+      navigate("/admin/ProcessFiles", { replace: true });
       //navigate("/admin/index");
     } else {
       setError("Incorrect email or password.");
@@ -114,7 +114,7 @@ const Login = () => {
             </Form>
           </CardBody>
         </Card>
-        <Row className="mt-2">
+        {/* <Row className="mt-2">
           <Col xs="6">
             <a
               className="text-light"
@@ -135,7 +135,7 @@ const Login = () => {
               <small>Create new account</small>
             </a>
           </Col>
-        </Row>
+        </Row> */}
       </Col>
     </>
   );
