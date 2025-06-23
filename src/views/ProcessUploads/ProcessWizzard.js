@@ -25,6 +25,8 @@ import * as requestMethods from "../../WebServiceCall/ServiceNames";
 import CryptoJS from 'crypto-js';
 import { appCred } from "../AppConfig";
 import axios from "axios";
+import JSZip from "jszip";
+import { saveAs } from "file-saver";
 
 const steps = ["Step-1", "Step-2", "Step-3", "Step-4"];
 
@@ -51,6 +53,7 @@ const ProcessWizzard = () => {
 
   const [selectedFileIds, setSelectedFileIds] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingDownload, setIsLoadingDownload] = useState(false);
 
   const [sourceFilePath, setSourceFilePath] = useState("");
   const [FinalPaths, setFinalPaths] = useState([]);
@@ -62,51 +65,58 @@ const ProcessWizzard = () => {
   };
 
   const downloadAllFiles = async () => {
+    debugger;
+    setIsLoadingDownload(true);
     console.log("Download started");
-    // debugger;
+    const zip = new JSZip();
+
     for (let i = 0; i < FinalPaths.length; i++) {
       const file = FinalPaths[i];
-      // console.log(`Downloading file ${i + 1}:`, file);
+
       try {
-        // console.log(`Fetching file from URL: ${file.Path}`);
         const response = await axios.get(file.Path, {
           responseType: "blob",
         });
 
-        // Detect MIME type from response or fallback based on file extension
         const contentType = response.headers["content-type"] || (
           file.Path.endsWith(".txt") ? "text/plain" :
             file.Path.endsWith(".pdf") ? "application/pdf" :
               "application/octet-stream"
         );
-        const blob = new Blob([response.data], { type: contentType });
-        const downloadUrl = URL.createObjectURL(blob);
-        // console.log("Blob created, download URL:", downloadUrl);
 
-        const a = document.createElement("a");
-        a.href = downloadUrl;
-        a.download = `${file.Type || "File"}_${i + 1}${file.Path.endsWith(".txt") ? ".txt" : ".pdf"}`;
-        // console.log("Anchor element created:", a);
+        const extension = file.Path.endsWith(".txt") ? ".txt" : ".pdf";
+        //const fileName = `${file.Type || "File"}_${i + 1}${extension}`;
+        const fileName = `${i + 1}-${file.Type || "File"}${extension}`;
 
-        document.body.appendChild(a);
-        console.log("Anchor appended to body");
 
-        a.click();
-        // console.log("Click triggered");
+        // Add file to zip
+        zip.file(fileName, response.data);
+        console.log(`Added to zip: ${fileName}`);
 
-        document.body.removeChild(a);
-        URL.revokeObjectURL(downloadUrl);
-        // console.log(`Download completed for file ${i + 1}`);
-        debugger;
       } catch (error) {
-        // console.error(`Download failed for ${file.Path}:`, error);
-        debugger;
+        setIsLoadingDownload(false);
+        console.error(`Download failed for ${file.Path}:`, error);
       }
     }
 
-    // console.log("Download process finished for all files.");
+    // Generate and trigger ZIP download
+    try {
+      const content = await zip.generateAsync({ type: "blob" });
+      const date = new Date();
+      const formattedDate = date.toLocaleDateString('en-GB', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric'
+      }).replace(/ /g, '');
+      const fileName = `D'scribe-${formattedDate}.zip`;
+      saveAs(content, fileName);
+      console.log("ZIP download triggered.");
+      setIsLoadingDownload(false);
+    } catch (zipError) {
+      setIsLoadingDownload(false);
+      console.error("Failed to generate ZIP:", zipError);
+    }
   };
-
 
 
 
@@ -547,10 +557,15 @@ const ProcessWizzard = () => {
                     )}
 
                     {(activeStep === 3 || activeStep === steps.length) && (
-                      <Button color="info" onClick={downloadAllFiles}>
-                        Download Files
-                      </Button>
+                      !isLoadingDownload ? (
+                        <Button color="info" onClick={downloadAllFiles}>
+                          Download Files
+                        </Button>
+                      ) : (
+                        <i className="fa fa-spinner fa-pulse fa-3x fa-fw"></i>
+                      )
                     )}
+
 
                     {!isLoading ? (
                       <Button
