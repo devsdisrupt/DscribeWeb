@@ -262,7 +262,7 @@ const ProcessWizzard = () => {
           console.log(publicURL);
           setSourceFilePath(NextPath);
 
-          addFinalPath("Uploaded", publicURL);
+          addFinalPath("Source", publicURL);
 
 
           const newFiles = selectedFiles.map((file) => ({
