@@ -51,6 +51,7 @@ import {
   Row,
   Col,
 } from "reactstrap";
+import { useNavigate } from "react-router-dom";
 
 var ps;
 
@@ -60,6 +61,12 @@ const Sidebar = (props) => {
   const activeRoute = (routeName) => {
     return props.location.pathname.indexOf(routeName) > -1 ? "active" : "";
   };
+
+  const navigate = useNavigate();
+  const handleLogout = async () => {
+    localStorage.removeItem("isLoggedIn");
+    navigate("/auth/login", { replace: true });
+  }
   // toggles collapse between opened and closed (true/false)
   const toggleCollapse = () => {
     setCollapseOpen((data) => !data);
@@ -124,6 +131,7 @@ const Sidebar = (props) => {
               className="navbar-brand-img"
               src={logo.imgSrc}
             />
+            <p className="text-gray " style={{ fontSize: "0.85rem" }}>AI-Powered Medical Transcriber</p>
           </NavbarBrand>
         ) : null}
         {/* User */}
@@ -146,7 +154,7 @@ const Sidebar = (props) => {
                 <h6 className="text-overflow m-0">Welcome!</h6>
               </DropdownItem>              
               <DropdownItem divider />
-              <DropdownItem href="#pablo" onClick={(e) => e.preventDefault()}>
+              <DropdownItem href="#pablo" onClick={handleLogout}>
                 <i className="ni ni-user-run" />
                 <span>Logout</span>
               </DropdownItem>

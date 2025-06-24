@@ -28,7 +28,7 @@ import axios from "axios";
 import JSZip from "jszip";
 import { saveAs } from "file-saver";
 
-const steps = ["Step-1", "Step-2", "Step-3", "Step-4"];
+const steps = ["Step-1", "Step-2", "Step-3"];
 
 
 // Encrypt
@@ -58,6 +58,8 @@ const ProcessWizzard = () => {
   const [sourceFilePath, setSourceFilePath] = useState("");
   const [FinalPaths, setFinalPaths] = useState([]);
   const [Apikey, setkey] = useState("");
+  const [completedSteps, setCompletedSteps] = useState(new Set());
+
 
 
   const addFinalPath = (type, path) => {
@@ -118,8 +120,35 @@ const ProcessWizzard = () => {
     }
   };
 
+  const CustomStepIcon = (props) => {
+    debugger;
+    const { active, completed, icon } = props;
 
+    const getColor = () => {
+      if (completed) return "#4caf50"; // green
+      if (active) return "#1976d2";   // primary blue
+      return "#cfd8dc";               // grey
+    };
 
+    return (
+      <div
+        style={{
+          backgroundColor: getColor(),
+          color: "white",
+          borderRadius: "50%",
+          width: 24,
+          height: 24,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          fontWeight: "bold",
+          fontSize: 14,
+        }}
+      >
+        {completed ? "✓" : icon}
+      </div>
+    );
+  };
 
   const handleUploadTypeChange = (e) => {
     setUploadType(e.target.value);
@@ -163,10 +192,12 @@ const ProcessWizzard = () => {
     setSourceFilePath("");
     setFinalPaths([]);
     setkey("");
+    setCompletedSteps(new Set()); // ✅ Reset completed steps
     setActiveStep(0);
   };
 
   const handleFileChange = (e) => {
+    debugger;
     const files = Array.from(e.target.files);
     setSelectedFiles((prev) => {
       const enrichedFiles = files.map((file, index) => ({
@@ -248,6 +279,7 @@ const ProcessWizzard = () => {
           debugger;
           // Clear file selection and collapse    
           //setSelectedFiles([]);
+          setCompletedSteps(prev => new Set(prev).add(activeStep));
           handleNext();
           setIsLoading(false);
         }
@@ -289,7 +321,8 @@ const ProcessWizzard = () => {
 
           debugger;
           // Clear file selection and collapse    
-          //setSelectedFiles([]);          
+          //setSelectedFiles([]);   
+          setCompletedSteps(prev => new Set(prev).add(activeStep));
           handleNext();
           setIsLoading(false);
         }
@@ -370,7 +403,8 @@ const ProcessWizzard = () => {
                       console.log(publicURL);
                       addFinalPath("Clinical Document", publicURL);
                       debugger;
-                      handleNext();
+                      setCompletedSteps(prev => new Set(prev).add(activeStep));
+                      //handleNext();
                       setIsLoading(false);
                     }
                     console.log("Upload success:", data);
@@ -515,19 +549,34 @@ const ProcessWizzard = () => {
                 style={{ flexWrap: 'wrap', rowGap: '1rem' }} // ✅ allow wrapping and spacing
               >
                 {steps.map((label, index) => {
+                  debugger;
                   const stepProps = {};
                   const labelProps = {};
+
+                  //const isCompleted = index < activeStep;
+                  const isCompleted = completedSteps.has(index);
+
+                  stepProps.completed = completedSteps.has(index);
+
 
 
                   labelProps.optional = (
                     <Typography variant="caption">
-                      {index === 0
-                        ? 'Upload Document'
-                        : index == 1
-                          ? 'Transcribe Document'
-                          : index == 2
-                            ? 'Generate Clinical Note'
-                            : 'Final Output'}
+                      {isCompleted
+                        ? (index === 0
+                          ? 'Uploaded'
+                          : index === 1
+                            ? 'Transcribed'
+                            : index === 2
+                              ? 'Note Generated'
+                              : 'Completed')
+                        : (index === 0
+                          ? 'Upload Document'
+                          : index === 1
+                            ? 'Transcribe Document'
+                            : index === 2
+                              ? 'Generate Clinical Note'
+                              : 'Final Output')}
                     </Typography>
                   );
 
@@ -536,9 +585,17 @@ const ProcessWizzard = () => {
                     stepProps.completed = false;
                   }
                   return (
+
+                    // <Step key={label} {...stepProps}>
+                    //   <StepLabel {...labelProps}>{label}</StepLabel>
+                    // </Step>
+
                     <Step key={label} {...stepProps}>
-                      <StepLabel {...labelProps}>{label}</StepLabel>
+                      <StepLabel {...labelProps} StepIconComponent={CustomStepIcon}>
+                        {label}
+                      </StepLabel>
                     </Step>
+
                   );
                 })}
               </Stepper>
@@ -574,7 +631,7 @@ const ProcessWizzard = () => {
                       </Button>
                     )}
 
-                    {(activeStep === 3 || activeStep === steps.length) && (
+                    {(activeStep === 2 && completedSteps.has(2)) && (
                       !isLoadingDownload ? (
                         <Button
                           style={{ backgroundColor: "#1976d2", borderColor: "#1976d2" }}
@@ -627,12 +684,18 @@ const ProcessWizzard = () => {
                       <i className="fa fa-spinner fa-pulse fa-3x fa-fw"></i>
                     )} */}
 
-                    {activeStep !== 3 && (
+                    {/* {activeStep !== 3 && ( */}
+                    {activeStep !== 3 && !(activeStep === 2 && completedSteps.has(2)) && (
                       !isLoading ? (
                         <Button
                           color="success"
                           size="lg"
-                          className="fw-bold bg-success text-white border-0 hover-darker"
+                          className={`fw-bold text-white border-0 hover-darker ${
+                            (activeStep === 0 && selectedFiles.length === 0) ||
+                            (activeStep === 1 && uploadType === 'bulk' && selectedFileIds.length === 0)
+                              ? 'bg-light'
+                              : 'bg-success'
+                          }`}
                           disabled={
                             (activeStep === 0 && selectedFiles.length === 0) ||
                             (activeStep === 1 && uploadType === 'bulk' && selectedFileIds.length === 0)
@@ -654,7 +717,8 @@ const ProcessWizzard = () => {
                               ? "Upload"
                               : activeStep === 1
                                 ? "Transcribe"
-                                : "Generate"
+                                : activeStep === 2 && !completedSteps.has(2) ? "Generate"
+                                  : ""
                           }
                         </Button>
                       ) : (

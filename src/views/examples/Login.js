@@ -29,7 +29,7 @@ const Login = () => {
     const requestData = { userid: email, password: password };    
     
 
-    if (email === "admin" && password === "admin") {
+    if (email.toLowerCase() === "admin" && password.toLowerCase() === "admin") {
       localStorage.setItem("isLoggedIn", "true");
       navigate("/admin/ProcessFiles", { replace: true });
       //navigate("/admin/index");
@@ -52,7 +52,7 @@ const Login = () => {
                 height: "auto",
               }}
             />
-            <p className="text-gray " style={{ fontSize: "0.75rem" }}>A portal for AI notes.</p>
+            <p className="text-gray " style={{ fontSize: "0.75rem" }}>AI-Powered Medical Transcriber</p>
           </CardHeader>
           <CardBody className="px-3 py-3 mt-3">
             {error && (
