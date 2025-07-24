@@ -26,10 +26,14 @@ const Login = () => {
 
   const handleSignIn = (e) => {
     e.preventDefault();
-    const requestData = { userid: email, password: password };    
-    
+    const requestData = { userid: email, password: password };
 
-    if (email.toLowerCase() === "admin" && password.toLowerCase() === "admin") {
+
+    if (
+      (email.toLowerCase() === "admin" && password.toLowerCase() === "admin") ||
+        (email.toLowerCase() === "user1" && password.toLowerCase() === "user1") ||
+      (email.toLowerCase() === "user2" && password.toLowerCase() === "user2")
+    ) {
       localStorage.setItem("isLoggedIn", "true");
       navigate("/admin/ProcessFiles", { replace: true });
       //navigate("/admin/index");
@@ -69,7 +73,7 @@ const Login = () => {
                     </InputGroupText>
                   </InputGroupAddon>
                   <Input
-                  bsSize="sm"
+                    bsSize="sm"
                     placeholder="Email"
                     type="text"
                     value={email}
@@ -85,7 +89,7 @@ const Login = () => {
                     </InputGroupText>
                   </InputGroupAddon>
                   <Input
-                  bsSize="sm"
+                    bsSize="sm"
                     placeholder="Password"
                     type="password"
                     value={password}
