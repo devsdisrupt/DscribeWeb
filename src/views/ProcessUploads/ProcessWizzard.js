@@ -347,7 +347,7 @@ const ProcessWizzard = () => {
       OpenAIAPIKey: Apikey,
       UserID: "DScribe",
       Password: "XDsLOkfUrSoPzmfo81wBisD1YtXh3rKp4eQ7vZ9jF8w=",
-      GPTModel: "gpt-4-1106-preview"
+      GPTModel: appCred.gptModel
     };
 
 
@@ -371,7 +371,8 @@ const ProcessWizzard = () => {
             OpenAIAPIKey: Apikey,
             UserID: "DScribe",
             Password: "XDsLOkfUrSoPzmfo81wBisD1YtXh3rKp4eQ7vZ9jF8w=",
-            GPTModel: "gpt-4-1106-preview"
+            //GPTModel: "gpt-4-1106-preview"
+            GPTModel: appCred.gptModel
           };
           APIRequest(requestMethods.PerformLLMProcessing, ReqData, false)
             //APIRequest(requestMethods.Test, formData, true)
@@ -391,7 +392,8 @@ const ProcessWizzard = () => {
                   OpenAIAPIKey: Apikey,
                   UserID: "DScribe",
                   Password: "XDsLOkfUrSoPzmfo81wBisD1YtXh3rKp4eQ7vZ9jF8w=",
-                  GPTModel: "gpt-4-1106-preview"
+                  //GPTModel: "gpt-4-1106-preview"
+                  GPTModel: appCred.gptModel
                 };
                 APIRequest(requestMethods.PerformLLMProcessing, ReqData, false)
                   //APIRequest(requestMethods.Test, formData, true)
